@@ -1,0 +1,176 @@
+#! /usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'aws_cft_tools'
+require 'clamp'
+require 'yaml'
+
+Clamp do
+  option ['-c', '--[no-]check'], :flag, 'only do non-destructive operations to check validity of request'
+  option ['-f', '--file'], 'FILE', 'set configuration file relative to the project root',
+         default: '.aws_cft', attribute_name: :config_file
+  option ['-n', '--[no-]noop'], :flag, 'only do operations that do not require modifying AWS',
+         attribute_name: :noop
+  option ['-p', '--profile'], 'PROFILE', 'set profile', default: 'default'
+  option ['-R', '--region'], 'REGION', 'set AWS region', environment_name: 'AWS_REGION',
+                                                         default: 'us-east-1'
+  option ['-t', '--root'], 'DIRECTORY', 'set infrastructure project root' do |v|
+    Pathname.new(v)
+  end
+  option ['-T', '--tag'], 'NAME:VALUE', 'require a tag have the given value (may be given more than once)',
+         multivalued: true
+  option ['-v', '--[no-]verbose'], :flag, 'verbose narration of actions'
+  option '--version', :flag, 'Show version' do
+    puts AwsCftTools::VERSION
+    exit(0)
+  end
+
+  def default_root
+    Pathname.new(ENV['AWS_CFT_HOME'] || '.')
+  end
+
+  subcommand 'deploy', 'Deploy templates to AWS' do
+    option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate' # , required: true
+    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-j', '--jobs'], 'INTEGER', 'maximum number of parallel stacks to build simultaneously',
+           default: 1 do |j|
+             if j == '-'
+               65_535
+             else
+               j.to_i
+             end
+           end
+    parameter '[TEMPLATES] ...', 'the templates to deploy'
+
+    def execute
+      AwsCftTools::Runbooks::Deploy.new(
+        with_file_options(
+          environment: environment,
+          role: role,
+          jobs: jobs,
+          templates: templates_list
+        )
+      )._run
+    rescue AwsCftTools::ToolingException => exception
+      puts "Unable to deploy: #{exception}"
+    end
+  end
+
+  subcommand 'diff', 'List differences between templates and AWS' do
+    option '--[no-]color', :flag, 'colorize output', default: $stdout.tty?, attribute_name: :color
+    option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
+    option ['-r', '--role'], 'ROLE', 'set role filter'
+    parameter '[TEMPLATES] ...', 'the templates to diff'
+
+    def execute
+      AwsCftTools::Runbooks::Diff.new(
+        with_file_options(
+          colorize: color?,
+          environment: environment,
+          role: role,
+          templates: templates_list
+        )
+      )._run
+    rescue AwsCftTools::ToolingException => exception
+      puts "Unable to diff: #{exception}"
+    end
+  end
+
+  subcommand 'hosts', 'List running instances' do
+    option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
+    option ['-r', '--role'], 'ROLE', 'set role filter'
+
+    def execute
+      AwsCftTools::Runbooks::Hosts.new(
+        with_file_options(
+          environment: environment,
+          role: role
+        )
+      )._run
+    end
+  end
+
+  subcommand 'images', 'List available AMIs' do
+    option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
+    option ['-r', '--role'], 'ROLE', 'set role filter'
+
+    def execute
+      AwsCftTools::Runbooks::Images.new(
+        with_file_options(
+          environment: environment,
+          role: role
+        )
+      )._run
+    end
+  end
+
+  subcommand 'init', 'Initialize a new infrastructure project' do
+    def execute
+      AwsCftTools::Runbooks::Init.new(with_file_options)._run
+    end
+  end
+
+  subcommand 'retract', 'Retract templates from AWS' do
+    option ['-e', '--environment'], 'STRING', 'set environment on which to operate', required: true
+    option ['-r', '--role'], 'STRING', 'set role filter'
+    parameter '[TEMPLATES] ...', 'the templates to retract'
+
+    def execute
+      AwsCftTools::Runbooks::Retract.new(
+        with_file_options(
+          environment: environment,
+          role: role,
+          templates: templates_list
+        )
+      )._run
+    rescue AwsCftTools::ToolingException => exception
+      puts "Unable to retract: #{exception}"
+    end
+  end
+
+  subcommand 'stacks', 'List deployed stacks in AWS' do
+    option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
+    option ['-r', '--role'], 'ROLE', 'set role filter'
+
+    def execute
+      AwsCftTools::Runbooks::Stacks.new(
+        with_file_options(
+          environment: environment,
+          role: role
+        )
+      )._run
+    end
+  end
+
+  def with_file_options(opts = {})
+    opts = global_options.merge(opts)
+
+    config_file_with_path = root + config_file
+    return opts unless config_file_with_path.exist?
+    config_options = YAML.safe_load(config_file_with_path.read, [Symbol])
+    config_options.merge(opts.reject { |_, v| v.nil? })
+  end
+
+  private
+
+  def global_options
+    {
+      config_file: config_file,
+      profile: profile,
+      root: root,
+      region: region,
+      noop: noop?,
+      check: check?,
+      verbose: verbose?,
+      tags: tag_hash
+    }
+  end
+
+  def tag_hash
+    tag_list.each_with_object({}) do |tag, acc|
+      k, v = tag.split(':', 2)
+      acc[k] = v
+    end
+  end
+end

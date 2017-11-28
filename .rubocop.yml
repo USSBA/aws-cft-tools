@@ -1,0 +1,19 @@
+---
+require: rubocop-rspec
+
+Metrics/BlockLength:
+  Exclude:
+    - 'aws-cft-tools.gemspec'
+    - 'example/**/*'
+    - 'exe/aws-cft'
+    - 'spec/**/*'
+
+Metrics/LineLength:
+  Max: 108
+  Details: >-
+    Long lines require scrolling left/right when reviewing in GitHub. Keep lines below
+    108 characters to avoid this. Be kind to your fellow reviewers.
+
+Style/FileName:
+  Exclude:
+    - 'lib/aws-cft-tools.rb'

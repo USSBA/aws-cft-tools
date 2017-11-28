@@ -1,0 +1,404 @@
+# Using `aws-cft`
+
+## Deploy
+
+```
+aws-cft deploy [OPTIONS]
+```
+
+Ensure stacks in AWS are up to date with the templates in the repository. This will create any missing
+stacks.
+
+### Options
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-j`, `--jobs INTEGER` ::
+maximum number of parallel stacks to build simultaneously (default: 1)
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+### Notes
+
+Stacks are built or updated in dependency order. If a template imports the outputs of another template,
+then the importing template will not be updated or created until after the exporting template is
+updated or created.
+
+When restricting the deployed templates to those with a particular role, the list of selected templates
+is expanded to include any templates on which the set of selected templates depend. For example, if
+template A has the role we wish to deploy, but it depends on template B, and template B depends on
+template C, then templates A, B, and C will be selected for updating or creating.
+
+**N.B.:** Using the `-j` option to deploy templates in parallel can cause the script to run into request
+limits in AWS. If AWS does refuse a request because of throttling, the script will exit with an error.
+Try running it again with a lower number of simultaneous jobs.
+
+**N.B.:** If you interrupt the script while it is deploying templates (without the `-c` or `-n` options),
+then none of the changes will be rolled back. Any stacks in-progress will continue to completion since
+the script only watches for completion once the build has been triggered.
+
+**N.B.** If you interrupt the script while it is checking on changesets (the `-c` option), then none of the
+changesets that are in-progress will be removed. You may have some "orphan" changesets to clean up by hand.
+
+#### Recommended Deployment Strategy
+
+When preparing to deploy new or updated templates, you can get an idea of what will happen by running
+the `deploy` command in the following sequence (replace `[OPTIONS]` with the options you need to manage
+select the right profile, environment, and/or roles):
+
+`aws-cft deploy [OPTIONS] -v -n` ::
+Review the proposed list of templates and make sure they are being updated or created as expected.
+
+`aws-cft deploy [OPTIONS] -v -c` ::
+Review the proposed list of changes for each stack and make sure there are no surprise replacements or deletions.
+
+`aws-cft deploy [OPTIONS] -v` ::
+Finally, execute the deployment and make the changes to the templates.
+
+### Examples
+
+List templates to be updated/created in dependency order using the `lower` AWS credentials in the
+`us-east-1` region, but don't make any changes in AWS:
+
+```shell
+% aws-cft deploy -p lower -t ~/Code/infrastructure -R us-east-1 -v -n
+```
+
+## Diff
+
+```
+aws-cft diff [OPTIONS]
+```
+
+Report on templates with no corresponding stack, stacks with no corresponding template, and the
+differences between the template source if the template has a corresponding stack.
+
+### Options
+
+`--[no-]-color` ::
+colorize output (default: true)
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+## Hosts
+
+```
+aws-cft hosts [OPTIONS]
+```
+
+Lists EC2 instances matching the criteria. Useful for discovering IP addresses of bastion hosts.
+
+### Options
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+## Images
+
+```
+aws-cft images [OPTIONS]
+```
+
+Lists AMIs matching the criteria. Useful for discovering the AMIs for a particular role and environment.
+
+### Options
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+## Init
+
+```
+aws-cft init [OPTIONS]
+```
+
+Creates an empty set of directories and basic `.aws_cft` configuration file for a new repository.
+
+### Options
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+### Notes
+
+The `-t` or `--root` option specifies the directory to be initialized. This defaults to the current
+directory in which the command is run. The `-f` or `--file` option specifies the name of the configuration
+file, which defaults to `.aws_cft`.
+
+This command creates the following directory and file structure:
+
+* cloudformation/
+** parameters/
+*** applications/
+*** data-resources/
+*** data-services/
+*** networks/
+*** security/
+*** vpcs/
+** templates/
+*** applications/
+*** data-resources/
+*** data-services/
+*** networks/
+*** security/
+*** vpcs/
+* .aws_cft
+
+## Retract
+
+```
+aws-cft retract [OPTIONS]
+```
+
+Remove stacks matching a set of templates. This will not remove stacks that are known dependencies for
+stacks that are not marked for retraction.
+
+### Options
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help
+
+### Notes
+
+Stacks are removed in reverse dependency order. If a template imports the outputs of another template,
+then the importing template will be removed before the exporting template is removed.
+
+When restricting retracted templates to those with a particular role, the list of selected templates
+is reduced by any templates on which non-selected templates depend. For example, if templates A and B have
+the role we wish to retract, and template C depends on template B, then only template A will be selected
+for retraction.
+
+## Stacks
+
+```
+aws-cft stacks [OPTIONS]
+```
+
+Lists stacks matching the  criteria.
+
+### Options
+
+`-e`, `--environment ENVIRONMENT` ::
+set environment on which to operate
+
+`-r`, `--role ROLE` ::
+set role filter
+
+`-c`, `--[no-]check` ::
+only do non-destructive operations to check validity of request
+
+`-f`, `--file FILE` ::
+set configuration file relative to the project root (default: ".aws_cft")
+
+`-n`, `--[no-]noop` ::
+only do operations that do not require modifying AWS
+
+`-p`, `--profile PROFILE` ::
+set profile (default: "default")
+
+`-R`, `--region REGION` ::
+set AWS region (default: "us-east-1")
+
+`-t`, `--root DIRECTORY` ::
+set infrastructure project root
+
+`-T`, `--tag NAME:VALUE` ::
+require a tag have the given value (may be given more than once)
+
+`-v`, `--[no-]verbose` ::
+verbose narration of actions
+
+`--version` ::
+Show version
+
+`-h`, `--help` ::
+print help

@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "measurementType": { "method": "linesOfCode" },
+  "agency": "SBA",
+  "releases": [
+    {
+      "name": "aws-cft-tools",
+      "repositoryURL": "https://github.com/USSBA/aws-cft-tools",
+      "description": "Command line tools to ease management of AWS infrastructure through CloudFormation",
+      "permissions": {
+        "license": {
+          "name": "Apache v2",
+          "URL": "https://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "usageType": "openSource",
+        "exemptionText": null
+      },
+      "vcs": "git",
+      "laborHours": 1,
+      "tags": ["SBA", "DevOps", "AWS"],
+      "contact": { "email": "Andrew.Davy@sba.gov" }
+    }
+  ]
+}
