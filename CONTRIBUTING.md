@@ -35,4 +35,4 @@ All pull requests must pass our continuous integration (CI) tests in order to be
 We use [rubocop](https://github.com/bbatsov/rubocop) with a style guide to enforce style on Ruby
 projects as part of the CI tests.
 
-<sub>The agency reserves the right to change this policy at any time.</sub>
+The agency reserves the right to change this policy at any time.
