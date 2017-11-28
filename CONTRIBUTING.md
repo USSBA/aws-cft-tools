@@ -9,7 +9,7 @@ We welcome contributions.
 
 The aws-cft-tools team handles development of this project in the open. As such, we use Github
 to keep track of project development. We may not accept contributions if they introduce operational
-complexity or don't align with the goals of the project.
+complexity or don't align with the goals of the project. All contributions are subject to the license and in no way imply compensation for contributions.
 
 ## Feedback
 
