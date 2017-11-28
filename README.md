@@ -82,15 +82,15 @@ gem build ./aws-cft-tools.gemspec
 
 ```json
 {
-		"Sid": "aws-cft",
-		"Effect": "Allow",
-		"Action": [
-				"ec2:DescribeInstances",
-				"ec2:DescribeTags",
-				"ec2:DescribeImages",
-				"ec2:DescribeImageAttribute"
-		],
-		"Resource": [ "*" ]
+  "Sid": "aws-cft",
+  "Effect": "Allow",
+  "Action": [
+    "ec2:DescribeInstances",
+    "ec2:DescribeTags",
+    "ec2:DescribeImages",
+    "ec2:DescribeImageAttribute"
+  ],
+  "Resource": [ "*" ]
 }
 ```
 
