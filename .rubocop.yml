@@ -1,6 +1,9 @@
 ---
 require: rubocop-rspec
 
+AllCops:
+  TargetRubyVersion: 2.4
+
 Metrics/BlockLength:
   Exclude:
     - 'aws-cft-tools.gemspec'
