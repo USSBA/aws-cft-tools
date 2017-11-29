@@ -1,5 +1,7 @@
 # AwsCftTools
 
+[![Build Status](https://travis-ci.org/USSBA/aws-cft-tools.svg?branch=master)](https://travis-ci.org/USSBA/aws-cft-tools)
+
 CloudFormation and related services provide a way to manage infrastructure state in "the cloud." This
 gem and its included command (`aws-cft`) build on top of this state management system to create an
 infrastructure management solution native to the AWS environment.
