@@ -23,6 +23,7 @@ module AwsCftTools
   require 'aws_cft_tools/deletion_change'
   require 'aws_cft_tools/client'
   require 'aws_cft_tools/dependency_tree'
+  require 'aws_cft_tools/threaded_output'
   require 'aws_cft_tools/stack'
   require 'aws_cft_tools/template'
   require 'aws_cft_tools/template_set'

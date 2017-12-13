@@ -48,12 +48,24 @@ module AwsCftTools
       end
 
       def process_slice(templates)
-        old_stdout = $stdout
-        threads = create_threads(templates) { |template| process_template(template) }
-        threads.map(&:thread).map(&:join)
-        puts threads.map(&:output).map(&:string)
+        if options[:jobs] && options[:jobs] > 1
+          process_slice_threaded(templates)
+        else
+          templates.each(&method(:process_template))
+        end
+      end
+
+      def process_slice_threaded(templates)
+        original_stdout = $stdout
+        new_stdout = ThreadedOutput.new(original_stdout)
+        $stdout = new_stdout
+        threads = create_threads(templates) do |template|
+          ThreadedOutput.prefix = template.name
+          process_template(template)
+        end
+        threads.map(&:join)
       ensure
-        $stdout = old_stdout # just in case!
+        $stdout = original_stdout
       end
 
       def process_template(template)
@@ -61,6 +73,8 @@ module AwsCftTools
         operation("#{is_update ? 'Updating' : 'Creating'}: #{template.name}") do
           exec_template(template: template, type: is_update ? :update : :create)
         end
+      ensure
+        $stdout.flush
       end
 
       def exec_template(params) # template:, type:
