@@ -53,14 +53,34 @@ module AwsCftTools
           id = id_params(params)
 
           aws_client.create_change_set(params)
-
-          aws_client.wait_until(:change_set_create_complete, id)
-
+          return [] if wait_for_changeset(id) == :nochanges
           mapped_changes(AWSEnumerator.new(aws_client, :describe_change_set, id, &:changes).to_a)
-        rescue Aws::Waiters::Errors::FailureStateError
-          []
         ensure
           aws_client.delete_change_set(id)
+        end
+
+        def wait_for_changeset(id, times_waited = 0)
+          times_waited += 1
+          aws_client.wait_until(:change_set_create_complete, id)
+        rescue Aws::Waiters::Errors::FailureStateError
+          status = check_failure(id)
+          return status unless status == :retry
+          raise_if_too_many_retries(params, times_waited)
+          sleep(2**times_waited + 1)
+          retry
+        end
+
+        def raise_if_too_many_retries(params, retries)
+          return if retries < 5
+          raise CloudFormationError, "Error waiting on changeset for #{params[:stack_name]}"
+        end
+
+        def check_failure(id)
+          status = aws_client.describe_change_set(id)
+          return :retry unless status.status == 'FAILED'
+          return :no_changes if status.status_reason.match?(/didn't contain changes/)
+          raise CloudFormationError,
+                "Error creating changeset for #{params[:stack_name]}: #{status.status_reason}"
         end
 
         def id_params(params)

@@ -25,7 +25,7 @@ module AwsCftTools
         def update_stack(template)
           aws_client.update_stack(update_stack_params(template))
           # we want to wait for the update to complete before we proceed
-          aws_client.wait_until(:stack_update_complete, stack_name: template.name)
+          wait_for_stack_operation(:stack_update_complete, template.name)
         rescue Aws::CloudFormation::Errors::ValidationError => exception
           raise exception unless exception.message.match?(/No updates/)
         end
@@ -39,7 +39,7 @@ module AwsCftTools
         def create_stack(template)
           aws_client.create_stack(create_stack_params(template))
           # we want to wait for the create to complete before we proceed
-          aws_client.wait_until(:stack_create_complete, stack_name: template.name)
+          wait_for_stack_operation(:stack_create_complete, template.name)
         end
 
         ##
@@ -54,6 +54,20 @@ module AwsCftTools
         end
 
         private
+
+        def wait_for_stack_operation(op, stack_name, times_waited = 0)
+          times_waited += 1
+          aws_client.wait_until(op, stack_name: stack_name)
+        rescue Aws::Waiters::Errors::FailureStateError
+          raise_if_too_many_retries(stack_name, times_waited)
+          sleep(2**times_waited + 1)
+          retry
+        end
+
+        def raise_if_too_many_retries(stack_name, retries)
+          return if retries < 5
+          raise CloudFormationError, "Error waiting on stack operation for #{stack_name}"
+        end
 
         def update_stack_params(template)
           common_stack_params(template).merge(

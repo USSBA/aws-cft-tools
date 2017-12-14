@@ -21,6 +21,7 @@ Clamp do
   option ['-T', '--tag'], 'NAME:VALUE', 'require a tag have the given value (may be given more than once)',
          multivalued: true
   option ['-v', '--[no-]verbose'], :flag, 'verbose narration of actions'
+  option ['-D', '--debug'], :flag, 'extra verbosity to aid in debugging'
   option '--version', :flag, 'Show version' do
     puts AwsCftTools::VERSION
     exit(0)
@@ -160,10 +161,16 @@ Clamp do
       profile: profile,
       root: root,
       region: region,
+      tags: tag_hash
+    }.merge(flag_options)
+  end
+
+  def flag_options
+    {
       noop: noop?,
       check: check?,
       verbose: verbose?,
-      tags: tag_hash
+      debug: debug?
     }
   end
 
