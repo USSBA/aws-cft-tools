@@ -82,7 +82,10 @@ tag for the version, push git commits and tags, and push the `.gem` file to
 
 ## Why `aws-cft-tools`?
 
-### `aws-cft-tools` vs "Vanilla" CloudFormation
+`aws-cft-tools` is designed to work in an "infrastructure as code" DevOps environment. Infrastructure is
+software that is developed, tested, peer reviewed, and finally merged and deployed.
+
+### "Vanilla" CloudFormation
 
 When first using CloudFormation, it is very easy to launch a single stack and get off the ground quickly.
 As you move forward, users quickly find out that their Templates need to be managed in source control.
@@ -96,6 +99,42 @@ This tool builds on top of the normal progression of teams using CloudFormation,
 Environments using parameters on templates.  It offers simple deployments to roll out a full stack in
 a new environment with a single command.  It allows developers to continue to use CloudFormation for all
 their infrastructure, while vastly simplifying the deployment and retraction process.
+
+### Ansible
+
+[Ansible](https://www.ansible.com/) provides features that are a mix of infrastructure management and
+instance configuration. For example, Ansible can do the work of TerraForm and Chef, combined. However,
+Ansible works best when working with an expected inventory of resources. It makes changes to bring
+infrastructure in line with the inventory. `aws-cft-tools` only manages CloudFormation templates and leaves
+configuration of instances to other tools such as Chef or Ansible.
+
+#### Using Ansible with `aws-cft-tools`
+
+Ansible can manage the production of an Amazon Machine Image (AMI). It can spin up a temporary EC2 instance
+and install all of the necessary system packages, make any configuration changes, and trigger the creation
+of a tagged AMI. If the AMI is tagged with an Environment and Role, then `aws-cft-tools` can discover the
+AMI and provide it as a parameter to any CloudFormation stacks that require the image. For example, creating
+a new AMI and then using `aws-cft-tools` to deploy the CloudFormation Template for an auto-scaling group
+that uses that AMI can result in the deployment of a new version of an application.
+
+### TerraForm
+
+[TerraForm](https://www.terraform.io/) and `aws-cft-tools` are solving similar problems with fundamentally
+different approaches. TerraForm is designed to work with multiple cloud providers while `aws-cft-tools` is
+specific to AWS. So TerraForm can't depend on features that aren't provided by all cloud providers. Thus,
+TerraForm requires a state file that introduces some complexity into managing infrastructure.
+
+Using `aws-cft-tools` doesn't mean infrastructure management is less complex than when using TerraForm. Only
+that the complexity is different. Instead of managing a state file outside of AWS, `aws-cft-tools` assumes
+that AWS is the source of all state information.
+
+Rather than computing changes, for example, `aws-cft-tools` requests a list of changes from AWS for a given
+change in template and parameters. This does take more time than if all of that information was in a local
+state file, but it ensures that any changes reflect the current deployment.
+
+In exchange for taking a little more time to make changes (e.g., pull requests and code reviews after
+initial development), teams can work on different parts of the infrastructure without having to coordinate
+with each other.
 
 ## Building Gem for Local Use
 
