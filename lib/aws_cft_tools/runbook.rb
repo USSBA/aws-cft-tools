@@ -48,6 +48,7 @@ module AwsCftTools
     def initialize(configuration = {})
       @options = configuration
       @client = AwsCftTools::Client.new(options)
+      @stdout = $stdout
     end
 
     # @!group Callbacks
@@ -135,6 +136,17 @@ module AwsCftTools
       else
         puts description
       end
+    end
+
+    ##
+    # @param note [String] a debug note
+    #
+    # Prints the given content to stdout if running in +debug+ mode. Debug statements are output
+    # without any capture when running multiple threads.
+    #
+    def debug(note = nil)
+      return unless note && options[:debug]
+      @stdout.puts "DEBUG\nDEBUG  " + note.split(/\n/).join("\nDEBUG  ") + "\nDEBUG"
     end
 
     ##

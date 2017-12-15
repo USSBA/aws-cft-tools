@@ -16,7 +16,7 @@
         "exemptionText": null
       },
       "vcs": "git",
-      "laborHours": 176,
+      "laborHours": 179,
       "tags": ["SBA", "DevOps", "AWS"],
       "contact": { "email": "Andrew.Davy@sba.gov" }
     }

@@ -19,6 +19,7 @@ module AwsCftTools
         # provide a tabular report of changeset actions
         #
         def narrate_changes(changes)
+          TablePrint::Config.io = $stdout
           tp(
             changes.map(&:to_narrative),
             %i[action logical_id physical_id type replacement scopes]
