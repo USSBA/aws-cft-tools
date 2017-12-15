@@ -1,5 +1,6 @@
 # AwsCftTools
 
+[![Gem Version](https://badge.fury.io/rb/aws-cft-tools.svg)](https://badge.fury.io/rb/aws-cft-tools)
 [![Build Status](https://travis-ci.org/USSBA/aws-cft-tools.svg?branch=master)](https://travis-ci.org/USSBA/aws-cft-tools)
 
 CloudFormation and related services provide a way to manage infrastructure state in "the cloud." This
