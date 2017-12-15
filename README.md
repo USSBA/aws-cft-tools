@@ -6,6 +6,12 @@ CloudFormation and related services provide a way to manage infrastructure state
 gem and its included command (`aws-cft`) build on top of this state management system to create an
 infrastructure management solution native to the AWS environment.
 
+`aws-cft-tools` empowers users to organize their CloudFormation templates using any form of directory
+structure, without the need to tediously deploy their templates in a specific order or create quickly
+outdated scripts to manage the deployment thereof.  This project links together templates using the
+Export/ImportValue features of CloudFormation to determine the order of operations, manages stack
+names, and supports multiple parallel "Environments" within a single AWS account.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -72,6 +78,23 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git
 tag for the version, push git commits and tags, and push the `.gem` file to
 [rubygems.org](https://rubygems.org).
+
+## Why `aws-cft-tools`?
+
+### `aws-cft-tools` vs "Vanilla" CloudFormation
+
+When first using CloudFormation, it is very easy to launch a single stack and get off the ground quickly.
+As you move forward, users quickly find out that their Templates need to be managed in source control.
+Later, users want to test their infrastructure changes in a different Environment, so a "dev" layer is
+created, then an "integration", then a "staging", etc.  Before too long, launching stacks is a nightmare
+due to dependency conflicts, manual naming failures of Stacks, typos, and so on.  On top of that,
+remembering which Stacks have been deployed for which environment becomes impossible, so infrastructure
+drift is inevitable.
+
+This tool builds on top of the normal progression of teams using CloudFormation, enabling managed
+Environments using parameters on templates.  It offers simple deployments to roll out a full stack in
+a new environment with a single command.  It allows developers to continue to use CloudFormation for all
+their infrastructure, while vastly simplifying the deployment and retraction process.
 
 ## Building Gem for Local Use
 
