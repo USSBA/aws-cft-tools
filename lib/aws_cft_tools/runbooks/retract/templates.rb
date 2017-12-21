@@ -28,8 +28,11 @@ module AwsCftTools
         #
         # @return [AwsCftTools::TemplateSet]
         def free_templates
-          set = AwsCftTools::TemplateSet.new(templates.in_folder_order(template_folder_order))
-          client.templates.closed_subset(set).reverse
+          deployed = client.stacks.map(&:name)
+          universe = AwsCftTools::TemplateSet.new(client.templates.select do |template|
+            deployed.include?(template.name)
+          end)
+          universe.closed_subset(templates).reverse
         end
 
         ##

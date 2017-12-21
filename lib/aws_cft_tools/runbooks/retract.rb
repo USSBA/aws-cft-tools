@@ -55,7 +55,10 @@ module AwsCftTools
       # report_undefined_image - provide list of undefined imports that block stack deployment
       #
       def report_template_dependencies
-        diff = (templates - free_templates).map { |template| template.filename.to_s }
+        free = free_templates
+        deployed = client.stacks.map(&:name)
+        all = templates.select { |template| deployed.include?(template.name) }
+        diff = (all - free).map { |template| template.filename.to_s }
         error_on_dependencies(diff) if diff.any?
       end
 
