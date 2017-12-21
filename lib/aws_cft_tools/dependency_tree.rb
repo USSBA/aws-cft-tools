@@ -98,12 +98,25 @@ module AwsCftTools
     private
 
     def close_subset(set, &block)
-      return [] unless block_given?
-      set - items_outside_subset(set, &block)
+      find_all_available(set.to_a) { |all, acc| find_next_candidate(all, acc, &block) }
     end
 
-    def items_outside_subset(set)
-      set.select { |node| (yield(node) - set).any? }
+    def find_all_available(candidates)
+      available = []
+      while candidates.any?
+        candidate = yield(candidates, available)
+        return available unless candidate
+        available << candidate
+        candidates.delete(candidate)
+      end
+      available
+    end
+
+    def find_next_candidate(candidates, selected)
+      return unless block_given?
+      candidates.detect do |candidate|
+        (yield(candidate) - selected).empty?
+      end
     end
   end
 end

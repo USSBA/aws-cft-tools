@@ -44,16 +44,25 @@ RSpec.describe AwsCftTools::DependencyTree do
 
   describe '#closed_subset' do
     before do
-      tree.linked('A', 'B')
-      tree.linked('C', 'D')
+      { 'A' => %w[B C D E F G H J L],
+        'B' => %w[L I J K M],
+        'C' => %w[D F L M],
+        'D' => %w[G H L F],
+        'E' => %w[L M],
+        'F' => ['M'],
+        'G' => ['I'] }.each do |from, tos|
+        tos.each do |to|
+          tree.linked(from, to)
+        end
+      end
     end
 
     it 'returns the items with no downstream dependencies' do
-      expect(tree.closed_subset(%w[C B])).to eq ['B']
+      expect(tree.closed_subset(%w[D E F G H I J K L M]).sort).to eq %w[D E F G H I J K L M]
     end
 
     it 'returns the items that are interdependent but with no downstream dependencies' do
-      expect(tree.closed_subset(%w[D C B])).to eq %w[D C B]
+      expect(tree.closed_subset(%w[F G L M]).sort).to eq %w[F L M]
     end
   end
 end

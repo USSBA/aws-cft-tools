@@ -82,8 +82,17 @@ RSpec.describe AwsCftTools::Runbooks::Retract do
                                    ])
     end
 
+    let(:all_stacks) do
+      all_templates.to_a.map do |template|
+        OpenStruct.new(
+          name: template.name
+        )
+      end
+    end
+
     before do
       allow(runbook).to receive(:deployed_filenames).and_return(['vpcs/base.yaml'])
+      allow(runbook.client).to receive(:stacks).and_return(all_stacks)
       allow(runbook.client).to receive(:templates).and_return(all_templates)
       allow(runbook.client).to receive(:images).and_return([])
       allow(runbook.client).to receive(:exports).and_return([])
@@ -163,7 +172,16 @@ RSpec.describe AwsCftTools::Runbooks::Retract do
   end
 
   describe '#free_templates' do
+    let(:all_stacks) do
+      all_templates.to_a.map do |template|
+        OpenStruct.new(
+          name: template.name
+        )
+      end
+    end
+
     before do
+      allow(runbook.client).to receive(:stacks).and_return(all_stacks)
       allow(runbook.client).to receive(:templates).and_return(all_templates)
     end
 
@@ -231,6 +249,25 @@ RSpec.describe AwsCftTools::Runbooks::Retract do
 
       it 'returns no templates in the set for removal' do
         expect(runbook.free_templates).to be_empty
+      end
+    end
+
+    describe 'with undeployed leaf templates' do
+      let(:all_templates) do
+        AwsCftTools::TemplateSet.new([
+                                       vpc_base_template,
+                                       vpc_network_template
+                                     ])
+      end
+
+      let(:all_stacks) do
+        [
+          OpenStruct.new(name: vpc_base_template.name)
+        ]
+      end
+
+      it 'returns a template in the set for removal' do
+        expect(runbook.free_templates).to eq [vpc_base_template]
       end
     end
   end
