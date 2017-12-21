@@ -259,7 +259,7 @@ RSpec.describe AwsCftTools::Runbooks::Retract do
                                        vpc_network_template
                                      ])
       end
-      
+
       let(:all_stacks) do
         [
           OpenStruct.new(name: vpc_base_template.name)
