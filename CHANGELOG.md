@@ -1,5 +1,12 @@
 # Changelog
 
+## UNRELEASED
+
+### Changed
+
+* When retracting stacks, a template that hadn't been deployed yet could block removal of any templates it
+  depended on. Now, retraction only considers templates that have been deployed. (Issue #18)
+
 ## [0.1.1] - 2017-12-15
 
 ### Added
