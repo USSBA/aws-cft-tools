@@ -24,10 +24,10 @@ module AwsCftTools
   #
   # === Allowed Environments
   #
-  # The environments in which a template should be deployed is provided by the +AllowedValues+ key of the
-  # +Environment+ template parameter.
+  # The environments in which a template should be deployed is provided by the +AllowedValues+ or the
+  # +AllowedPattern+ key of the +Environment+ template parameter.
   #
-  # @example Allowed Environments
+  # @example Allowed Environments (explicit list)
   #   ---
   #   Parameters:
   #     Environment:
@@ -35,6 +35,12 @@ module AwsCftTools
   #         - QA
   #         - Staging
   #         - Production
+  #
+  # @example Allowed Environments (implicit pattern)
+  #   ---
+  #   Parameters:
+  #     Environment:
+  #       AllowedPattern: ^(QA|Staging|Production|Dev-.+)$
   #
   # === Allowed Regions
   #

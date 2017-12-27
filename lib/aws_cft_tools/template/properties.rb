@@ -15,8 +15,15 @@ module AwsCftTools
         template.dig('Parameters', 'Environment', 'AllowedValues') || []
       end
 
+      def allowed_environments_regex
+        source = template.dig('Parameters', 'Environment', 'AllowedPattern')
+        Regexp.compile(source) if source
+      end
+
       def environment?(value)
-        allowed_environments.include?(value)
+        return allowed_environments.include?(value) if allowed_environments.any?
+        regex = allowed_environments_regex
+        return regex.match?(value) if regex
       end
 
       ##

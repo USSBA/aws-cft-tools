@@ -114,8 +114,14 @@ module AwsCftTools
       def parameters_for_filename_and_environment!(param_source, env)
         return { Environment: env } unless param_source
 
-        params = YAML.safe_load(process_erb_file(param_source), [], [], true)[env] || {}
-        params.update(Environment: env)
+        params_for_all = YAML.safe_load(process_erb_file(param_source), [], [], true)
+        return params_for_all[env].update('Environment' => env) if params_for_all.key?(env)
+
+        # now check for regex match on keys
+        params_for_all.each do |env_name, params|
+          return params.update('Environment' => env) if Regexp.compile("\\A#{env_name}\\Z").match?(env)
+        end
+        { 'Environment' => env }
       end
 
       def process_erb_file(content)

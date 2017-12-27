@@ -32,6 +32,119 @@ RSpec.describe AwsCftTools::Template do
     allow(FileTest).to receive(:exist?).with(template_path.to_path).and_return(true)
   end
 
+  describe 'environment pattern matching' do
+    let(:template_filename) { Pathname.new('vpc/base.yaml') }
+
+    let(:template_contents) do
+      <<~EOF
+        ---
+        AWSTemplateFormatVersion: "2010-09-09"
+        Parameters:
+          Environment:
+            Default: QA
+            AllowedPattern: "^(QA|Staging|Production|POC-.+)$"
+      EOF
+    end
+
+    it 'matches on Staging' do
+      expect(template.environment?('Staging')).to eq true
+    end
+
+    it 'matches on POC-Foo' do
+      expect(template.environment?('POC-Foo')).to eq true
+    end
+
+    it 'fails to match POC-' do
+      expect(template.environment?('POC-')).to eq false
+    end
+
+    it 'fails to match fooPOC-bar' do
+      expect(template.environment?('fooPOC-bar')).to eq false
+    end
+  end
+
+  describe 'parameter files' do
+    let(:template_filename) { Pathname.new('vpc/base.yaml') }
+
+    let(:template_contents) do
+      <<~EOF
+        ---
+        AWSTemplateFormatVersion: "2010-09-09"
+        Parameters:
+          Environment:
+            Default: QA
+            AllowedPattern: "^(QA|Staging|Production|POC-.+)$"
+      EOF
+    end
+
+    let(:parameter_contents) do
+      <<~EOF
+        ---
+        QA:
+          Foo: bar
+        Staging:
+          Foo: baz
+        Production:
+          Foo: bat
+        POC-one:
+          Foo: one
+        POC-.*:
+          Foo: any
+      EOF
+    end
+
+    let(:parameter_path) do
+      (
+        client_options[:root] +
+        client_options[:parameter_dir] +
+        template_filename
+      ).cleanpath
+    end
+
+    let(:params) { template.parameters }
+
+    before do
+      allow(IO).to receive(:read).with(parameter_path.to_path).and_return(parameter_contents)
+      allow(FileTest).to receive(:exist?).with(parameter_path.to_path).and_return(true)
+    end
+
+    describe 'in QA' do
+      let(:env) { 'QA' }
+
+      it 'has the right "Foo"' do
+        expect(params['Foo']).to eq 'bar'
+      end
+    end
+
+    describe 'in POC-one' do
+      let(:env) { 'POC-one' }
+
+      it 'has the right "Foo"' do
+        expect(params['Foo']).to eq 'one'
+      end
+    end
+
+    describe 'in POC-supercalifragilistic' do
+      let(:env) { 'POC-supercalifragilistic' }
+
+      it 'has the right "Foo"' do
+        expect(params['Foo']).to eq 'any'
+      end
+    end
+
+    describe 'in undefined' do
+      let(:env) { 'undefined' }
+
+      it 'has the no "Foo"' do
+        expect(params['Foo']).to be_nil
+      end
+
+      it 'has the right environment' do
+        expect(params['Environment']).to eq 'undefined'
+      end
+    end
+  end
+
   describe 'yaml templates' do
     let(:template_filename) { Pathname.new('vpc/base.yaml') }
 
