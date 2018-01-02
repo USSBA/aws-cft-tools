@@ -108,7 +108,7 @@ RSpec.describe AwsCftTools::Template do
       allow(FileTest).to receive(:exist?).with(parameter_path.to_path).and_return(true)
     end
 
-    describe 'in QA' do
+    describe 'in an environment that does not match a pattern and is explicitely named' do
       let(:env) { 'QA' }
 
       it 'has the right "Foo"' do
@@ -116,26 +116,34 @@ RSpec.describe AwsCftTools::Template do
       end
     end
 
-    describe 'in POC-one' do
+    describe 'in an environment that matches a pattern but is explicitely named' do
       let(:env) { 'POC-one' }
 
-      it 'has the right "Foo"' do
+      it 'has the right parameter value' do
         expect(params['Foo']).to eq 'one'
       end
-    end
 
-    describe 'in POC-supercalifragilistic' do
-      let(:env) { 'POC-supercalifragilistic' }
-
-      it 'has the right "Foo"' do
-        expect(params['Foo']).to eq 'any'
+      it 'has the right environment' do
+        expect(params['Environment']).to eq 'POC-one'
       end
     end
 
-    describe 'in undefined' do
+    describe 'in an environment matching on a pattern and not explicitely named' do
+      let(:env) { 'POC-supercalifragilistic' }
+
+      it 'has the right parameter value' do
+        expect(params['Foo']).to eq 'any'
+      end
+
+      it 'has the right environment' do
+        expect(params['Environment']).to eq 'POC-supercalifragilistic'
+      end
+    end
+
+    describe 'in an undefined environment' do
       let(:env) { 'undefined' }
 
-      it 'has the no "Foo"' do
+      it 'has the no parameter value' do
         expect(params['Foo']).to be_nil
       end
 

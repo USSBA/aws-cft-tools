@@ -2,14 +2,14 @@
 
 ## UNRELEASED
 
-### Changed
+### Added
 
-* Added support for `AllowedPattern` in the `Environment` template parameter.
+* Support for `AllowedPattern` in the `Environment` template parameter. (Issue #16)
 
-* Added support for parameter files to have environment names that resemble regular expressions. If the
-  parameter file doesn't have a key that matches the environment name exactly, then each of the top-level
-  keys in the file will be interpreted as a regular expression and matched against the environment being
-  deployed. The first match wins, so if multiple keys can match, then the result is undefined.
+* Support for parameter files to have environment names that resemble regular expressions. If the parameter
+  file doesn't have a key that matches the environment name exactly, then each of the top-level keys in the
+  file will be interpreted as a regular expression and matched against the environment being deployed. The
+  first match wins, so if multiple keys can match, then the result is undefined. (Issue #16)
 
 ## [0.1.2] - 2017-12-22
 
