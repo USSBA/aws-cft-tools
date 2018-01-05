@@ -32,6 +32,32 @@ RSpec.describe AwsCftTools::Template do
     allow(FileTest).to receive(:exist?).with(template_path.to_path).and_return(true)
   end
 
+  describe 'templates without an outputs section' do
+    let(:template_filename) { Pathname.new('vpc/base.yaml') }
+
+    let(:template_contents) do
+      <<~EOF
+        ---
+        AWSTemplateFormatVersion: "2010-09-09"
+        Parameters:
+          Environment:
+            Description: "Enter QA, Staging, or Production. Default is QA."
+            Type: String
+            Default: QA
+            AllowedValues:
+              - QA
+              - Staging
+              - Production
+      EOF
+    end
+
+    describe '#outputs' do
+      it 'reflects the lack of outputs in the template' do
+        expect(template.outputs).to be_empty()
+      end
+    end
+  end
+
   describe 'yaml templates' do
     let(:template_filename) { Pathname.new('vpc/base.yaml') }
 
