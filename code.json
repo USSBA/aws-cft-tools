@@ -8,10 +8,10 @@
       "repositoryURL": "https://github.com/USSBA/aws-cft-tools",
       "description": "Command line tools to ease management of AWS infrastructure through CloudFormation",
       "permissions": {
-        "license": {
+        "licenses": [{
           "name": "Apache v2",
           "URL": "https://www.apache.org/licenses/LICENSE-2.0"
-        },
+        }],
         "usageType": "openSource",
         "exemptionText": null
       },
