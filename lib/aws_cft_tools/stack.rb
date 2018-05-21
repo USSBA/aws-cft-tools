@@ -23,7 +23,7 @@ module AwsCftTools
     # @return [String] the unparsed body of the template definition
     #
     def template_source
-      @template ||= begin
+      @template_source ||= begin
         resp = @aws_client.get_template(stack_name: name,
                                         template_stage: 'Original')
         resp.template_body

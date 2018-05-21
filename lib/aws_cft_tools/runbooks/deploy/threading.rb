@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'thread'
-
 module AwsCftTools
   module Runbooks
     class Deploy

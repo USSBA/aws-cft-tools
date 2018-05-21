@@ -57,27 +57,37 @@ module AwsCftTools
       end
 
       def process_slice_threaded(templates)
-        original_stdout = $stdout
-        $stdout = ThreadedOutput.new(original_stdout)
-        template_list = templates.map(&:name).join(', ')
-        debug("Creating threads for #{template_list}")
-        threads = create_threads(templates, &method(:process_template))
-        debug("Waiting on threads for #{template_list}")
-        threads.map(&:join)
+        original_stdout, $stdout = $stdout, ThreadedOutput.new(original_stdout)
+        create_threads(templates, &method(:process_template)).map(&:join)
       ensure
         $stdout = original_stdout
       end
 
       def process_template(template)
-        ThreadedOutput.prefix = template_name = template.name
-        debug("Processing #{template_name}")
-        is_update = deployed_templates.include?(template)
-        operation("#{is_update ? 'Updating' : 'Creating'}: #{template_name}") do
-          exec_template(template: template, type: is_update ? :update : :create)
+        setup_processing_template_thread(template)
+        if deployed_templates.include?(template)
+          manage_template_process(template, 'Updating', :update)
+        else
+          manage_template_process(template, 'Creating', :create)
         end
       ensure
+        cleanup_processing_template_thread(template)
+      end
+
+      def setup_processing_template_thread(template)
+        ThreadedOutput.prefix = template_name = template.name
+        debug("Processing #{template_name}")
+      end
+
+      def manage_template_process(template, op_name, op_type)
+        operation("#{op_name}: #{template.name}") do
+          exec_template(template: template, type: op_type)
+        end
+      end
+
+      def cleanup_processing_template_thread(template)
         $stdout.flush
-        debug("Finished processing #{template_name}")
+        debug("Finished processing #{template.name}")
       end
 
       def exec_template(params) # template:, type:

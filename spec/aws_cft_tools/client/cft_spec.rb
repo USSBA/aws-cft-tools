@@ -124,7 +124,7 @@ RSpec.describe AwsCftTools::Client::CFT do
       let(:client_options) do
         {
           region: 'us-east-1',
-          role: role
+          roles: [role]
         }
       end
 

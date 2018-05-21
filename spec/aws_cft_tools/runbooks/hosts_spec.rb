@@ -7,11 +7,11 @@ RSpec.describe AwsCftTools::Runbooks::Hosts do
   let(:runbook) { described_class.new(config) }
 
   let(:env) {}
-  let(:role) {}
+  let(:roles) {}
 
   let(:config) do
     {
-      role: role,
+      roles: roles,
       environment: env
     }
   end
@@ -31,7 +31,7 @@ RSpec.describe AwsCftTools::Runbooks::Hosts do
   end
 
   describe 'with a role but no environment' do
-    let(:role) { 'role' }
+    let(:roles) { ['role'] }
 
     it 'has all columns except role' do
       expect(runbook.columns).to eq %w[public_ip private_ip environment instance]
@@ -40,7 +40,7 @@ RSpec.describe AwsCftTools::Runbooks::Hosts do
 
   describe 'with an environment and a role' do
     let(:env) { 'env' }
-    let(:role) { 'role' }
+    let(:roles) { ['role'] }
 
     it 'has all columns except environment and role' do
       expect(runbook.columns).to eq %w[public_ip private_ip instance]

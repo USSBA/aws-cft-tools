@@ -8,6 +8,7 @@ module AwsCftTools
     # All of the business logic behind direct interaction with the AWS API for EC2 instances and related
     # resources.
     #
+    # :reek:UncommunicativeModuleName
     class EC2 < Base
       ##
       #
@@ -104,20 +105,18 @@ module AwsCftTools
       end
 
       def role_filter
-        tag_filter('Role', options[:role])
+        tag_filter('Role', options[:roles])
       end
 
       def arbitrary_tag_filters
         tags = options[:tags] || []
-        tags.inject([]) do |filter_set, tag_value|
-          tag, value = tag_value
-          filter_set << { name: "tag:#{tag}", values: [value] }
-        end
+        tags.inject([]) { |set, tag_value| set + tag_filter(*tag_value) }
       end
 
       def tag_filter(tag, value)
-        if value
-          [{ name: "tag:#{tag}", values: [value] }]
+        values = [value].flatten.compact
+        if values.any?
+          [{ name: "tag:#{tag}", values: values }]
         else
           []
         end

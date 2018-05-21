@@ -1,0 +1,15 @@
+plugins:
+  brakeman:
+    enabled: false
+    config:
+      app_path: lib
+  reek:
+    enabled: true
+    config:
+      UtilityFunction:
+        public_methods_only: true
+  rubocop:
+    enabled: true
+    channel: rubocop-0-54
+    config:
+      file: .rubocop.yml

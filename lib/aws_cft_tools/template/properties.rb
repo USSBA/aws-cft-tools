@@ -30,8 +30,8 @@ module AwsCftTools
       # Returns the parameter defaults for the template.
       #
       def default_parameters
-        (template['Parameters'] || []).each_with_object({}) do |param, hash|
-          hash[param.first] = param.last['Default']
+        (template['Parameters'] || []).each_with_object({}) do |(key, value), hash|
+          hash[key] = value['Default']
         end
       end
 
@@ -126,6 +126,7 @@ module AwsCftTools
       ## expands ${param} when ${param} is defined in the parameters
       ## but only works with "${param}" and not [ "${param}", {param: value}]
       ## only substitutes when a value is provided as a parameter - otherwise, leaves it unsubsituted
+      # :reek:FeatureEnvy
       def with_substitutions(string)
         return string if string.is_a?(Array)
 

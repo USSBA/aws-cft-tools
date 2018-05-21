@@ -101,8 +101,7 @@ module AwsCftTools
       find_all_available(set.to_a) { |all, acc| find_next_candidate(all, acc, &block) }
     end
 
-    def find_all_available(candidates)
-      available = []
+    def find_all_available(candidates, available = [])
       while candidates.any?
         candidate = yield(candidates, available)
         return available unless candidate
