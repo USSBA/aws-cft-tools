@@ -22,7 +22,7 @@ RSpec.describe AwsCftTools::Client::EC2 do
       {
         region: 'us-east-1',
         environment: 'foo',
-        role: 'bar',
+        roles: ['bar'],
         tags: { 'Team' => 'baz' }
       }
     end

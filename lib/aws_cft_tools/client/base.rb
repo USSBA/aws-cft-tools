@@ -24,10 +24,10 @@ module AwsCftTools
 
       ##
       # The AWS SDK client object for this part of the AwsCftTools client
+      # :reek:NilCheck
       def aws_client
         @aws_client ||= begin
-          klass = self.class.aws_client_class
-          klass && klass.new(
+          self.class.aws_client_class&.new(
             region: options[:region],
             profile: options[:profile]
           )

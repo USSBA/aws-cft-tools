@@ -32,6 +32,7 @@ module AwsCftTools
       #
       # @param template [AwsCftTools::Template]
       #
+      # :reek:DuplicateMethodCall
       def add_template(template, dependencies = [])
         process_slice unless fulfilled?(dependencies)
         unless fulfilled?(dependencies)

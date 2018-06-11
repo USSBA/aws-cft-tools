@@ -135,6 +135,7 @@ module AwsCftTools
       end
     end
 
+    # :reek:FeatureEnvy
     def hash_to_param_list(hash)
       hash.map do |key, value|
         {

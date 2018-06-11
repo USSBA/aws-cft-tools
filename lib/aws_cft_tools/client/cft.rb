@@ -73,9 +73,10 @@ module AwsCftTools
         !env || tag_set['Environment'] == env
       end
 
+      # :reek:FeatureEnvy
       def satisfies_role(tag_set)
-        role = options[:role]
-        !role || tag_set['Role'] == role
+        roles = options[:roles] || []
+        roles.empty? || roles.include?(tag_set['Role'])
       end
 
       def satisfies_tags(tag_set)

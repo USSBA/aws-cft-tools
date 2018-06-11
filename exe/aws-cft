@@ -23,7 +23,7 @@ Clamp do
   option ['-v', '--[no-]verbose'], :flag, 'verbose narration of actions'
   option ['-D', '--debug'], :flag, 'extra verbosity to aid in debugging'
   option '--version', :flag, 'Show version' do
-    puts AwsCftTools::VERSION
+    puts "#{File.basename($PROGRAM_NAME)} #{AwsCftTools::VERSION}"
     exit(0)
   end
 
@@ -33,7 +33,7 @@ Clamp do
 
   subcommand 'deploy', 'Deploy templates to AWS' do
     option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate' # , required: true
-    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-r', '--role'], 'ROLE', 'set role filter', multivalued: true
     option ['-j', '--jobs'], 'INTEGER', 'maximum number of parallel stacks to build simultaneously',
            default: 1 do |j|
              if j == '-'
@@ -48,7 +48,7 @@ Clamp do
       AwsCftTools::Runbooks::Deploy.new(
         with_file_options(
           environment: environment,
-          role: role,
+          roles: role_list,
           jobs: jobs,
           templates: templates_list
         )
@@ -61,7 +61,7 @@ Clamp do
   subcommand 'diff', 'List differences between templates and AWS' do
     option '--[no-]color', :flag, 'colorize output', default: $stdout.tty?, attribute_name: :color
     option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
-    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-r', '--role'], 'ROLE', 'set role filter', multivalued: true
     parameter '[TEMPLATES] ...', 'the templates to diff'
 
     def execute
@@ -69,7 +69,7 @@ Clamp do
         with_file_options(
           colorize: color?,
           environment: environment,
-          role: role,
+          roles: role_list,
           templates: templates_list
         )
       )._run
@@ -80,13 +80,13 @@ Clamp do
 
   subcommand 'hosts', 'List running instances' do
     option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
-    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-r', '--role'], 'ROLE', 'set role filter', multivalued: true
 
     def execute
       AwsCftTools::Runbooks::Hosts.new(
         with_file_options(
           environment: environment,
-          role: role
+          roles: role_list
         )
       )._run
     end
@@ -94,13 +94,13 @@ Clamp do
 
   subcommand 'images', 'List available AMIs' do
     option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
-    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-r', '--role'], 'ROLE', 'set role filter', multivalued: true
 
     def execute
       AwsCftTools::Runbooks::Images.new(
         with_file_options(
           environment: environment,
-          role: role
+          roles: role_list
         )
       )._run
     end
@@ -114,14 +114,14 @@ Clamp do
 
   subcommand 'retract', 'Retract templates from AWS' do
     option ['-e', '--environment'], 'STRING', 'set environment on which to operate', required: true
-    option ['-r', '--role'], 'STRING', 'set role filter'
+    option ['-r', '--role'], 'STRING', 'set role filter', multivalued: true
     parameter '[TEMPLATES] ...', 'the templates to retract'
 
     def execute
       AwsCftTools::Runbooks::Retract.new(
         with_file_options(
           environment: environment,
-          role: role,
+          roles: role_list,
           templates: templates_list
         )
       )._run
@@ -132,13 +132,13 @@ Clamp do
 
   subcommand 'stacks', 'List deployed stacks in AWS' do
     option ['-e', '--environment'], 'ENVIRONMENT', 'set environment on which to operate'
-    option ['-r', '--role'], 'ROLE', 'set role filter'
+    option ['-r', '--role'], 'ROLE', 'set role filter', multivalued: true
 
     def execute
       AwsCftTools::Runbooks::Stacks.new(
         with_file_options(
           environment: environment,
-          role: role
+          roles: role_list
         )
       )._run
     end
@@ -175,9 +175,9 @@ Clamp do
   end
 
   def tag_hash
-    tag_list.each_with_object({}) do |tag, acc|
+    tag_list.each_with_object(Hash.new { |hash, key| hash[key] = [] }) do |tag, acc|
       k, v = tag.split(':', 2)
-      acc[k] = v
+      acc[k] |= [v]
     end
   end
 end

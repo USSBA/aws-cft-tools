@@ -55,10 +55,7 @@ module AwsCftTools
       # report_undefined_image - provide list of undefined imports that block stack deployment
       #
       def report_template_dependencies
-        free = free_templates
-        deployed = client.stacks.map(&:name)
-        all = templates.select { |template| deployed.include?(template.name) }
-        diff = (all - free).map { |template| template.filename.to_s }
+        diff = template_dependencies_difference
         error_on_dependencies(diff) if diff.any?
       end
 
@@ -66,6 +63,12 @@ module AwsCftTools
         puts '*** Unable to remove templates.'
         puts 'The following templates are dependencies for templates not marked for removal: ', templates
         exit 1
+      end
+
+      def template_dependencies_difference
+        deployed = client.stacks.map(&:name)
+        all = templates.select { |template| deployed.include?(template.name) }
+        (all - free_templates).map { |template| template.filename.to_s }
       end
     end
   end

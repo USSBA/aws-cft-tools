@@ -63,11 +63,18 @@ module AwsCftTools
           times_waited += 1
           aws_client.wait_until(:change_set_create_complete, id)
         rescue Aws::Waiters::Errors::FailureStateError
-          status = check_failure(id)
+          status = manage_retrying_wait(id, params, times_waited)
           return status unless status == :retry
-          raise_if_too_many_retries(params, times_waited)
-          sleep(2**times_waited + 1)
           retry
+        end
+
+        def manage_retrying_wait(id, params, times_waited)
+          status = check_failure(id)
+          if status == :retry
+            raise_if_too_many_retries(params, times_waited)
+            sleep(2**times_waited + 1)
+          end
+          status
         end
 
         def raise_if_too_many_retries(params, retries)
@@ -78,9 +85,9 @@ module AwsCftTools
         def check_failure(id)
           status = aws_client.describe_change_set(id)
           return :retry unless status.status == 'FAILED'
-          return :no_changes if status.status_reason.match?(/didn't contain changes/)
-          raise CloudFormationError,
-                "Error creating changeset for #{params[:stack_name]}: #{status.status_reason}"
+          reason = status.status_reason
+          return :no_changes if reason.match?(/didn't contain changes/)
+          raise CloudFormationError, "Error creating changeset for #{params[:stack_name]}: #{reason}"
         end
 
         def id_params(params)

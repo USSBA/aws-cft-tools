@@ -8,11 +8,11 @@ RSpec.describe AwsCftTools::Runbooks::Stacks do
 
   let(:constant_columns) { %w[filename created_at name state] }
   let(:env) {}
-  let(:role) {}
+  let(:roles) { [] }
 
   let(:config) do
     {
-      role: role,
+      roles: roles,
       environment: env
     }
   end
@@ -31,20 +31,37 @@ RSpec.describe AwsCftTools::Runbooks::Stacks do
     end
   end
 
-  describe 'with a role but no environment' do
-    let(:role) { 'role' }
+  describe 'with a single role but no environment' do
+    let(:roles) { ['role'] }
 
     it 'has all columns except role' do
       expect(runbook.columns).to eq %w[environment] + constant_columns
     end
   end
 
+  describe 'with more than one role but no environment' do
+    let(:roles) { %w[role1 role2] }
+
+    it 'has all columns except environment' do
+      expect(runbook.columns).to eq %w[environment role] + constant_columns
+    end
+  end
+
   describe 'with an environment and a role' do
     let(:env) { 'env' }
-    let(:role) { 'role' }
+    let(:roles) { ['role'] }
 
     it 'has all columns except environment and role' do
       expect(runbook.columns).to eq constant_columns
+    end
+  end
+
+  describe 'with an environment and multiple roles' do
+    let(:env) { 'env' }
+    let(:roles) { %w[role1 role2] }
+
+    it 'has all columns except environment' do
+      expect(runbook.columns).to eq %w[role] + constant_columns
     end
   end
 end

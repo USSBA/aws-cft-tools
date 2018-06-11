@@ -10,23 +10,22 @@ module AwsCftTools
         # Reporting functions for the Diff context
         #
         module Reporting
+          private
+
+          # :reek:FeatureEnvy
           def output_report_on_missing_templates(missing)
-            return if missing.empty?
-            puts "\nStacks with no template:\n  #{missing.sort.join("\n  ")}\n"
+            puts "\nStacks with no template:\n  #{missing.sort.join("\n  ")}\n" if missing.any?
           end
 
           def output_report_on_missing_stacks(missing)
             missing = template_filenames(missing)
-            return if missing.empty?
-            puts "\nUndeployed templates:\n  #{missing.sort.join("\n  ")}\n"
+            puts "\nUndeployed templates:\n  #{missing.sort.join("\n  ")}\n" if missing.any?
           end
 
           def output_report_on_differences(diffs)
             report_on_blank_diffs(diffs)
             report_on_real_diffs(diffs)
           end
-
-          private
 
           def report_on_blank_diffs(diffs)
             no_diffs = diffs.keys.select { |name| diffs[name].match(/\A\s*\Z/) }

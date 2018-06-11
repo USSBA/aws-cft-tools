@@ -3,7 +3,10 @@
 require 'json'
 
 module AwsCftTools
+  # :reek:IrresponsibleModule
   class Template
+    require_relative 'parameters'
+
     ##
     # Simple derived information about templates.
     #
@@ -64,7 +67,12 @@ module AwsCftTools
       #
       # @return [Hash]
       def parameters
-        @parameters ||= parameters_for_filename_and_environment(parameters_source, @options[:environment])
+        @parameters ||= Parameters.new(
+          environment: @options[:environment],
+          aws_env: aws_env,
+          content: parameters_source,
+          file: parameter_file
+        ).to_h
       end
 
       private
@@ -95,37 +103,6 @@ module AwsCftTools
 
       def template_content_for_dsl!
         with_environment { JSON.parse(DSLContext.module_eval(template_source).to_json) }
-      end
-
-      ##
-      # Loads the contents of the full path and passes it through ERB before parsing as YAML. Returns
-      # a Ruby structure.
-      #
-      # If no file exists, then a simple hash with the +Environment+ key set.
-      #
-      def parameters_for_filename_and_environment(param_source, env)
-        parameters_for_filename_and_environment!(param_source, env)
-      rescue AwsCftTools::ToolingException
-        raise
-      rescue => exception
-        raise AwsCftTools::ParseException, "Error while reading and parsing #{parameter_file}: #{exception}"
-      end
-
-      def parameters_for_filename_and_environment!(param_source, env)
-        return { Environment: env } unless param_source
-
-        params_for_all = YAML.safe_load(process_erb_file(param_source), [], [], true)
-        return params_for_all[env].update('Environment' => env) if params_for_all.key?(env)
-
-        # now check for regex match on keys
-        params_for_all.each do |env_name, params|
-          return params.update('Environment' => env) if Regexp.compile("\\A#{env_name}\\Z").match?(env)
-        end
-        { 'Environment' => env }
-      end
-
-      def process_erb_file(content)
-        with_environment { ERB.new(content).result }
       end
 
       def with_environment

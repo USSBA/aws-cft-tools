@@ -57,6 +57,7 @@ module AwsCftTools
         set.select { |template| template.filename.to_s.start_with?(folder + '/') }
       end
 
+      # :reek:FeatureEnvy
       def calculate_closure(set, &block)
         stack = set.clone
 

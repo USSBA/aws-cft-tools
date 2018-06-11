@@ -55,9 +55,9 @@ module AwsCftTools
 
         private
 
-        def wait_for_stack_operation(op, stack_name, times_waited = 0)
+        def wait_for_stack_operation(operation, stack_name, times_waited = 0)
           times_waited += 1
-          aws_client.wait_until(op, stack_name: stack_name)
+          aws_client.wait_until(operation, stack_name: stack_name)
         rescue Aws::Waiters::Errors::FailureStateError
           raise_if_too_many_retries(stack_name, times_waited)
           sleep(2**times_waited + 1)

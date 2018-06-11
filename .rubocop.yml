@@ -10,6 +10,7 @@ Metrics/BlockLength:
     - 'example/**/*'
     - 'exe/aws-cft'
     - 'spec/**/*'
+    - 'vendor/**/*'
 
 Metrics/LineLength:
   Max: 108

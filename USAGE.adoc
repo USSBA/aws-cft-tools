@@ -15,7 +15,7 @@ stacks.
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-j`, `--jobs INTEGER` ::
 maximum number of parallel stacks to build simultaneously (default: 1)
@@ -114,7 +114,7 @@ colorize output (default: true)
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-c`, `--[no-]check` ::
 only do non-destructive operations to check validity of request
@@ -160,7 +160,7 @@ Lists EC2 instances matching the criteria. Useful for discovering IP addresses o
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-c`, `--[no-]check` ::
 only do non-destructive operations to check validity of request
@@ -206,7 +206,7 @@ Lists AMIs matching the criteria. Useful for discovering the AMIs for a particul
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-f`, `--file FILE` ::
 set configuration file relative to the project root (default: ".aws_cft")
@@ -315,7 +315,7 @@ stacks that are not marked for retraction.
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-c`, `--[no-]check` ::
 only do non-destructive operations to check validity of request
@@ -371,7 +371,7 @@ Lists stacks matching the  criteria.
 set environment on which to operate
 
 `-r`, `--role ROLE` ::
-set role filter
+add a role filter
 
 `-c`, `--[no-]check` ::
 only do non-destructive operations to check validity of request

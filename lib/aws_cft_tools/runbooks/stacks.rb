@@ -35,8 +35,9 @@ module AwsCftTools
         options[:environment] ? [] : ['environment']
       end
 
+      # :reek:NilCheck
       def role_column
-        options[:role] ? [] : ['role']
+        options[:roles]&.size == 1 ? [] : ['role']
       end
     end
   end

@@ -9,11 +9,11 @@ RSpec.describe AwsCftTools::Runbooks::Images do
   let(:constant_columns) { %w[created_at public type image_id] }
 
   let(:env) {}
-  let(:role) {}
+  let(:roles) {}
 
   let(:config) do
     {
-      role: role,
+      roles: roles,
       environment: env
     }
   end
@@ -33,7 +33,7 @@ RSpec.describe AwsCftTools::Runbooks::Images do
   end
 
   describe 'with a role but no environment' do
-    let(:role) { 'role' }
+    let(:roles) { ['role'] }
 
     it 'has all columns except role' do
       expect(runbook.columns).to eq %w[environment] + constant_columns
@@ -42,7 +42,7 @@ RSpec.describe AwsCftTools::Runbooks::Images do
 
   describe 'with an environment and a role' do
     let(:env) { 'env' }
-    let(:role) { 'role' }
+    let(:roles) { ['role'] }
 
     it 'has all columns except environment and role' do
       expect(runbook.columns).to eq constant_columns
