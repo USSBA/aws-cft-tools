@@ -23,7 +23,14 @@ module AwsCftTools
         # @param template [AwsCftTools::Template]
         #
         def update_stack(template)
-          aws_client.update_stack(update_stack_params(template))
+          throttle_backoff = 0
+          begin
+            aws_client.update_stack(update_stack_params(template))
+          rescue Aws::CloudFormation::Errors::Throttling
+            throttle_backoff += 0.5
+            sleep 2**throttle_backoff
+            retry
+          end
           # we want to wait for the update to complete before we proceed
           wait_for_stack_operation(:stack_update_complete, template.name)
         rescue Aws::CloudFormation::Errors::ValidationError => exception
@@ -37,7 +44,14 @@ module AwsCftTools
         # @param template [AwsCftTools::Template]
         #
         def create_stack(template)
-          aws_client.create_stack(create_stack_params(template))
+          throttle_backoff = 0
+          begin
+            aws_client.create_stack(create_stack_params(template))
+          rescue Aws::CloudFormation::Errors::Throttling
+            throttle_backoff += 0.5
+            sleep 2**throttle_backoff
+            retry
+          end
           # we want to wait for the create to complete before we proceed
           wait_for_stack_operation(:stack_create_complete, template.name)
         end
@@ -49,15 +63,35 @@ module AwsCftTools
         # @param template [AwsCftTools::Template]
         #
         def delete_stack(template)
-          aws_client.delete_stack(delete_stack_params(template))
-          aws_client.wait_until(:stack_delete_complete, stack_name: template.name)
+          throttle_backoff = 0
+          begin
+            aws_client.delete_stack(delete_stack_params(template))
+          rescue Aws::CloudFormation::Errors::Throttling
+            throttle_backoff += 0.5
+            sleep 2**throttle_backoff
+            retry
+          end
+          begin
+            aws_client.wait_until(:stack_delete_complete, stack_name: template.name)
+          rescue Aws::CloudFormation::Errors::Throttling
+            throttle_backoff += 0.5
+            sleep 2**throttle_backoff
+            retry
+          end
         end
 
         private
 
         def wait_for_stack_operation(op, stack_name, times_waited = 0)
           times_waited += 1
-          aws_client.wait_until(op, stack_name: stack_name)
+          throttle_backoff = 0
+          begin
+            aws_client.wait_until(op, stack_name: stack_name)
+          rescue Aws::CloudFormation::Errors::Throttling
+            throttle_backoff += 0.5
+            sleep 2**throttle_backoff
+            retry
+          end
         rescue Aws::Waiters::Errors::FailureStateError
           raise_if_too_many_retries(stack_name, times_waited)
           sleep(2**times_waited + 1)

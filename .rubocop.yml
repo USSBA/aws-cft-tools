@@ -20,3 +20,6 @@ Metrics/LineLength:
 Style/FileName:
   Exclude:
     - 'lib/aws-cft-tools.rb'
+
+Metrics/MethodLength:
+  Max: 15
