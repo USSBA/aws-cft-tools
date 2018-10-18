@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.4] - 2018-10-18
+
+### Changed
+
+* Handled exponential backoff for AWS API Throttling
+
 ## [0.1.3] - 2018-01-05
 
 ### Added
