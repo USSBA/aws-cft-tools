@@ -1,5 +1,11 @@
 # AwsCftTools
 
+**DEPRECATION NOTICE**
+
+This tool is no longer maintained.
+
+---
+
 [![Gem Version](https://badge.fury.io/rb/aws-cft-tools.svg)](https://badge.fury.io/rb/aws-cft-tools)
 [![Build Status](https://travis-ci.org/USSBA/aws-cft-tools.svg?branch=master)](https://travis-ci.org/USSBA/aws-cft-tools)
 
